@@ -1,0 +1,13 @@
+{
+   "Author": "Bartosz",
+   "Comment": "",
+   "Last Problem Type": "High Frequency",
+   "Last Solver Type": "HF Time Domain",
+   "Last Solver Type Abb": "t",
+   "Mesh Cells": "514,080",
+   "Mesh Type": "Hexahedral",
+   "Modeler Unique ID": "5:init_yagi.cst?3c3b6839283a7950dd6e63eae996bf96?14910:numberofparameters=15:port=1>mode=1>zre=50>zim=0:::lambdusia?r?s_d3?l_d3?s_d2?l_d2?s_d1?l_d1?dipole_gap?dipole_l?dipole_s?l0?s0?d?l",
+   "ProjectVersion": "'# MWS Version: Version 2025.0 - Aug 30 2024 - ACIS 34.0.1 -",
+   "Results": "Time Domain: S-Parameter",
+   "Version": "3"
+}

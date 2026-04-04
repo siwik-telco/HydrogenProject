@@ -1,0 +1,730 @@
+'# MWS Version: Version 2025.0 - Aug 30 2024 - ACIS 34.0.1 -
+
+'# length = mm
+'# frequency = GHz
+'# time = ns
+'# frequency range: fmin = 1.3 fmax = 1.6
+'# created = '[VERSION]2025.0|34.0.1|20240830[/VERSION]
+
+
+'@ use template: wodor.cfg
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+'set the units
+With Units
+    .SetUnit "Length", "mm"
+    .SetUnit "Frequency", "GHz"
+    .SetUnit "Voltage", "V"
+    .SetUnit "Resistance", "Ohm"
+    .SetUnit "Inductance", "nH"
+    .SetUnit "Temperature",  "degC"
+    .SetUnit "Time", "ns"
+    .SetUnit "Current", "A"
+    .SetUnit "Conductance", "S"
+    .SetUnit "Capacitance", "pF"
+End With
+
+ThermalSolver.AmbientTemperature "0"
+
+'----------------------------------------------------------------------------
+
+'set the frequency range
+Solver.FrequencyRange "1.3", "1.6"
+
+'----------------------------------------------------------------------------
+
+Plot.DrawBox True
+
+With Background
+     .Type "Normal"
+     .Epsilon "1.0"
+     .Mu "1.0"
+     .XminSpace "0.0"
+     .XmaxSpace "0.0"
+     .YminSpace "0.0"
+     .YmaxSpace "0.0"
+     .ZminSpace "0.0"
+     .ZmaxSpace "0.0"
+End With
+
+With Boundary
+     .Xmin "expanded open"
+     .Xmax "expanded open"
+     .Ymin "expanded open"
+     .Ymax "expanded open"
+     .Zmin "expanded open"
+     .Zmax "expanded open"
+     .Xsymmetry "none"
+     .Ysymmetry "none"
+     .Zsymmetry "none"
+End With
+
+' switch on FD-TET setting for accurate farfields
+
+FDSolver.ExtrudeOpenBC "True"
+
+Mesh.FPBAAvoidNonRegUnite "True"
+Mesh.ConsiderSpaceForLowerMeshLimit "False"
+Mesh.MinimumStepNumber "5"
+Mesh.RatioLimit "20"
+Mesh.AutomeshRefineAtPecLines "True", "10"
+
+With MeshSettings
+     .SetMeshType "Hex"
+     .Set "RatioLimitGeometry", "20"
+     .Set "EdgeRefinementOn", "1"
+     .Set "EdgeRefinementRatio", "10"
+End With
+
+With MeshSettings
+     .SetMeshType "Tet"
+     .Set "VolMeshGradation", "1.5"
+     .Set "SrfMeshGradation", "1.5"
+End With
+
+With MeshSettings
+     .SetMeshType "HexTLM"
+     .Set "RatioLimitGeometry", "20"
+End With
+
+PostProcess1D.ActivateOperation "vswr", "true"
+PostProcess1D.ActivateOperation "yz-matrices", "true"
+
+With MeshSettings
+     .SetMeshType "Srf"
+     .Set "Version", 1
+End With
+IESolver.SetCFIEAlpha "1.000000"
+
+With FarfieldPlot
+	.ClearCuts ' lateral=phi, polar=theta
+	.AddCut "lateral", "0", "1"
+	.AddCut "lateral", "90", "1"
+	.AddCut "polar", "90", "1"
+End With
+
+'----------------------------------------------------------------------------
+
+Dim sDefineAt As String
+sDefineAt = "1.42"
+Dim sDefineAtName As String
+sDefineAtName = "1.42"
+Dim sDefineAtToken As String
+sDefineAtToken = "f="
+Dim aFreq() As String
+aFreq = Split(sDefineAt, ";")
+Dim aNames() As String
+aNames = Split(sDefineAtName, ";")
+
+Dim nIndex As Integer
+For nIndex = LBound(aFreq) To UBound(aFreq)
+
+Dim zz_val As String
+zz_val = aFreq (nIndex)
+Dim zz_name As String
+zz_name = sDefineAtToken & aNames (nIndex)
+
+' Define E-Field Monitors
+With Monitor
+    .Reset
+    .Name "e-field ("& zz_name &")"
+    .Dimension "Volume"
+    .Domain "Frequency"
+    .FieldType "Efield"
+    .MonitorValue  zz_val
+    .Create
+End With
+
+' Define H-Field Monitors
+With Monitor
+    .Reset
+    .Name "h-field ("& zz_name &")"
+    .Dimension "Volume"
+    .Domain "Frequency"
+    .FieldType "Hfield"
+    .MonitorValue  zz_val
+    .Create
+End With
+
+' Define Farfield Monitors
+With Monitor
+    .Reset
+    .Name "farfield ("& zz_name &")"
+    .Domain "Frequency"
+    .FieldType "Farfield"
+    .MonitorValue  zz_val
+    .ExportFarfieldSource "False"
+    .Create
+End With
+
+Next
+
+'----------------------------------------------------------------------------
+
+With MeshSettings
+     .SetMeshType "Hex"
+     .Set "Version", 1%
+End With
+
+With Mesh
+     .MeshType "PBA"
+End With
+
+'set the solver type
+ChangeSolverType("HF Time Domain")
+
+'----------------------------------------------------------------------------
+
+'@ define material: Wood
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Material
+     .Reset
+     .Name "Wood"
+     .Folder ""
+     .FrqType "all"
+     .Type "Normal"
+     .SetMaterialUnit "GHz", "mm"
+     .Epsilon "1"
+     .Mu "1"
+     .Kappa "0"
+     .TanD "0.0"
+     .TanDFreq "0.0"
+     .TanDGiven "False"
+     .TanDModel "ConstTanD"
+     .KappaM "0"
+     .TanDM "0.0"
+     .TanDMFreq "0.0"
+     .TanDMGiven "False"
+     .TanDMModel "ConstTanD"
+     .DispModelEps "None"
+     .DispModelMu "None"
+     .DispersiveFittingSchemeEps "Nth Order"
+     .MaximalOrderNthModelFitEps "2"
+     .ErrorLimitNthModelFitEps "0.02"
+     .UseOnlyDataInSimFreqRangeNthModelEps "False"
+     .DispersiveFittingSchemeMu "Nth Order"
+     .AddGeneralDispersionValueEps "0,2", "2,5", "0,36"
+     .AddGeneralDispersionValueEps "0,58", "2,1", "0,33"
+     .AddGeneralDispersionValueEps "1,36", "1,9", "0,31"
+     .AddGeneralDispersionValueEps "1,94", "1,9", "0,31"
+     .AddGeneralDispersionValueEps "2,52", "1,8", "0,28"
+     .AddGeneralDispersionValueEps "3,1", "1,7", "0,27"
+     .AddGeneralDispersionValueEps "3,68", "1,7", "0,25"
+     .AddGeneralDispersionValueEps "4,26", "1,65", "0,245"
+     .AddGeneralDispersionValueEps "4,84", "1,6", "0,25"
+     .UseGeneralDispersionEps "True"
+     .UseGeneralDispersionMu "False"
+     .Rho "500"
+     .ThermalType "Normal"
+     .ThermalConductivity "0.2"
+     .SpecificHeat "2000", "J/K/kg"
+     .Colour "0", "1", "1"
+     .Wireframe "False"
+     .Reflection "False"
+     .Allowoutline "True"
+     .Transparentoutline "False"
+     .Transparency "0"
+     .Create
+End With
+
+'@ new component: component1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Component.New "component1"
+
+'@ define brick: component1:boom
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Brick
+     .Reset 
+     .Name "boom" 
+     .Component "component1" 
+     .Material "Wood" 
+     .Xrange "-d/2", "d/2" 
+     .Yrange "-d/2", "d/2" 
+     .Zrange "-4", "L" 
+     .Create
+End With
+
+'@ define material: Aluminum
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Material
+     .Reset
+     .Name "Aluminum"
+     .Folder ""
+     .FrqType "static"
+     .Type "Normal"
+     .SetMaterialUnit "Hz", "mm"
+     .Epsilon "1"
+     .Mu "1.0"
+     .Kappa "3.56e+007"
+     .TanD "0.0"
+     .TanDFreq "0.0"
+     .TanDGiven "False"
+     .TanDModel "ConstTanD"
+     .KappaM "0"
+     .TanDM "0.0"
+     .TanDMFreq "0.0"
+     .TanDMGiven "False"
+     .TanDMModel "ConstTanD"
+     .DispModelEps "None"
+     .DispModelMu "None"
+     .DispersiveFittingSchemeEps "General 1st"
+     .DispersiveFittingSchemeMu "General 1st"
+     .UseGeneralDispersionEps "False"
+     .UseGeneralDispersionMu "False"
+     .FrqType "all"
+     .Type "Lossy metal"
+     .MaterialUnit "Frequency", "GHz"
+     .MaterialUnit "Geometry", "mm"
+     .MaterialUnit "Time", "s"
+     .MaterialUnit "Temperature", "Kelvin"
+     .Mu "1.0"
+     .Sigma "3.56e+007"
+     .Rho "2700.0"
+     .ThermalType "Normal"
+     .ThermalConductivity "237.0"
+     .SpecificHeat "900", "J/K/kg"
+     .MetabolicRate "0"
+     .BloodFlow "0"
+     .VoxelConvection "0"
+     .MechanicsType "Isotropic"
+     .YoungsModulus "69"
+     .PoissonsRatio "0.33"
+     .ThermalExpansionRate "23"
+     .ReferenceCoordSystem "Global"
+     .CoordSystemType "Cartesian"
+     .NLAnisotropy "False"
+     .NLAStackingFactor "1"
+     .NLADirectionX "1"
+     .NLADirectionY "0"
+     .NLADirectionZ "0"
+     .Colour "1", "1", "0"
+     .Wireframe "False"
+     .Reflection "False"
+     .Allowoutline "True"
+     .Transparentoutline "False"
+     .Transparency "0"
+     .Create
+End With
+
+'@ define cylinder: component1:reflector
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "reflector" 
+     .Component "component1" 
+     .Material "Aluminum" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-L0/2", "L0/2" 
+     .Xcenter "0" 
+     .Zcenter "s0" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ define cylinder: component1:dziura
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "dziura" 
+     .Component "component1" 
+     .Material "Wood" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-d/2", "d/2" 
+     .Xcenter "0" 
+     .Zcenter "s0" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ boolean subtract shapes: component1:boom, component1:dziura
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Solid.Subtract "component1:boom", "component1:dziura"
+
+'@ define cylinder: component1:dipol
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "dipol" 
+     .Component "component1" 
+     .Material "Aluminum" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "Dipole_L/2", "-Dipole_L/2" 
+     .Xcenter "0" 
+     .Zcenter "Dipole_s" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ define cylinder: component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "solid1" 
+     .Component "component1" 
+     .Material "Vacuum" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-d/2", "d/2" 
+     .Xcenter "0" 
+     .Zcenter "Dipole_s" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ boolean subtract shapes: component1:boom, component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Solid.Subtract "component1:boom", "component1:solid1"
+
+'@ define cylinder: component1:gap_dipole
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "gap_dipole" 
+     .Component "component1" 
+     .Material "Vacuum" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-Dipole_gap/2", "Dipole_gap/2" 
+     .Xcenter "0" 
+     .Zcenter "Dipole_s" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ boolean subtract shapes: component1:dipol, component1:gap_dipole
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Solid.Subtract "component1:dipol", "component1:gap_dipole"
+
+'@ pick circle center point
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Pick.PickCirclecenterFromId "component1:dipol", "5"
+
+'@ pick circle center point
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Pick.PickCirclecenterFromId "component1:dipol", "6"
+
+'@ define discrete port: 1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With DiscretePort 
+     .Reset 
+     .PortNumber "1" 
+     .Type "SParameter"
+     .Label ""
+     .Folder ""
+     .Impedance "50.0"
+     .Voltage "1.0"
+     .Current "1.0"
+     .Monitor "True"
+     .Radius "0.0"
+     .SetP1 "True", "0", "1.4", "42.2"
+     .SetP2 "True", "0", "-1.4", "42.2"
+     .InvertDirection "False"
+     .LocalCoordinates "False"
+     .Wire ""
+     .Position "end1"
+     .Create 
+End With
+
+'@ define cylinder: component1:direk1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "direk1" 
+     .Component "component1" 
+     .Material "Aluminum" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-L_d1/2", "L_d1/2" 
+     .Xcenter "0" 
+     .Zcenter "S_d1" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ define cylinder: component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "solid1" 
+     .Component "component1" 
+     .Material "Vacuum" 
+     .OuterRadius "r" 
+     .InnerRadius "r" 
+     .Axis "y" 
+     .Yrange "-d/2", "d/2" 
+     .Xcenter "0" 
+     .Zcenter "S_d1" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ delete shape: component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Solid.Delete "component1:solid1"
+
+'@ define cylinder: component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "solid1" 
+     .Component "component1" 
+     .Material "Wood" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-d/2", "d/2" 
+     .Xcenter "0" 
+     .Zcenter "S_d1" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ boolean subtract shapes: component1:boom, component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Solid.Subtract "component1:boom", "component1:solid1"
+
+'@ define cylinder: component1:direk2
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "direk2" 
+     .Component "component1" 
+     .Material "Aluminum" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-L_d2/2", "L_d2/2" 
+     .Xcenter "0" 
+     .Zcenter "S_d2" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ define cylinder: component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "solid1" 
+     .Component "component1" 
+     .Material "Wood" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-d/2", "d/2" 
+     .Xcenter "0" 
+     .Zcenter "s_d2" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ boolean subtract shapes: component1:boom, component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Solid.Subtract "component1:boom", "component1:solid1"
+
+'@ define cylinder: component1:direk3
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "direk3" 
+     .Component "component1" 
+     .Material "Aluminum" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-l_d3/2", "l_d3/2" 
+     .Xcenter "0" 
+     .Zcenter "s_d3" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ define cylinder: component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Cylinder 
+     .Reset 
+     .Name "solid1" 
+     .Component "component1" 
+     .Material "Wood" 
+     .OuterRadius "r" 
+     .InnerRadius "0" 
+     .Axis "y" 
+     .Yrange "-d/2", "d/2" 
+     .Xcenter "0" 
+     .Zcenter "s_d3" 
+     .Segments "0" 
+     .Create 
+End With
+
+'@ boolean subtract shapes: component1:boom, component1:solid1
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Solid.Subtract "component1:boom", "component1:solid1"
+
+'@ define time domain solver acceleration
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Solver 
+     .UseParallelization "True"
+     .MaximumNumberOfThreads "1024"
+     .MaximumNumberOfCPUDevices "2"
+     .RemoteCalculation "False"
+     .UseDistributedComputing "False"
+     .MaxNumberOfDistributedComputingPorts "64"
+     .DistributeMatrixCalculation "True"
+     .MPIParallelization "False"
+     .AutomaticMPI "False"
+     .ConsiderOnly0D1DResultsForMPI "False"
+     .HardwareAcceleration "True"
+     .MaximumNumberOfGPUs "1"
+End With
+UseDistributedComputingForParameters "False"
+MaxNumberOfDistributedComputingParameters "2"
+UseDistributedComputingMemorySetting "False"
+MinDistributedComputingMemoryLimit "0"
+UseDistributedComputingSharedDirectory "False"
+OnlyConsider0D1DResultsForDC "False"
+
+'@ define time domain solver parameters
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+Mesh.SetCreator "High Frequency" 
+
+With Solver 
+     .Method "Hexahedral"
+     .CalculationType "TD-S"
+     .StimulationPort "All"
+     .StimulationMode "All"
+     .SteadyStateLimit "-40"
+     .MeshAdaption "False"
+     .AutoNormImpedance "True"
+     .NormingImpedance "50"
+     .CalculateModesOnly "False"
+     .SParaSymmetry "False"
+     .StoreTDResultsInCache  "False"
+     .RunDiscretizerOnly "False"
+     .FullDeembedding "False"
+     .SuperimposePLWExcitation "False"
+     .UseSensitivityAnalysis "False"
+End With
+
+'@ define pml specials
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With Boundary
+     .ReflectionLevel "0.0001" 
+     .MinimumDistanceType "Fraction" 
+     .MinimumDistancePerWavelengthNewMeshEngine "4" 
+     .MinimumDistanceReferenceFrequencyType "CenterNMonitors" 
+     .FrequencyForMinimumDistance "1.42" 
+     .SetAbsoluteDistance "0.0" 
+End With
+
+'@ farfield plot options
+
+'[VERSION]2025.0|34.0.1|20240830[/VERSION]
+With FarfieldPlot 
+     .Plottype "3D" 
+     .Vary "angle1" 
+     .Theta "0" 
+     .Phi "0" 
+     .Step "5" 
+     .Step2 "5" 
+     .SetLockSteps "True" 
+     .SetPlotRangeOnly "False" 
+     .SetThetaStart "0" 
+     .SetThetaEnd "180" 
+     .SetPhiStart "0" 
+     .SetPhiEnd "360" 
+     .SetTheta360 "False" 
+     .SymmetricRange "False" 
+     .SetTimeDomainFF "False" 
+     .SetFrequency "-1" 
+     .SetTime "0" 
+     .SetColorByValue "True" 
+     .DrawStepLines "False" 
+     .DrawIsoLongitudeLatitudeLines "False" 
+     .ShowStructure "False" 
+     .ShowStructureProfile "False" 
+     .SetStructureTransparent "False" 
+     .SetFarfieldTransparent "False" 
+     .AspectRatio "Free" 
+     .ShowGridlines "True" 
+     .InvertAxes "False", "False" 
+     .SetSpecials "enablepolarextralines" 
+     .SetPlotMode "Directivity" 
+     .Distance "1" 
+     .UseFarfieldApproximation "True" 
+     .IncludeUnitCellSidewalls "True" 
+     .SetScaleLinear "False" 
+     .SetLogRange "40" 
+     .SetLogNorm "0" 
+     .DBUnit "0" 
+     .SetMaxReferenceMode "abs" 
+     .EnableFixPlotMaximum "False" 
+     .SetFixPlotMaximumValue "1.0" 
+     .SetInverseAxialRatio "False" 
+     .SetAxesType "user" 
+     .SetAntennaType "unknown" 
+     .Phistart "1.000000e+00", "0.000000e+00", "0.000000e+00" 
+     .Thetastart "0.000000e+00", "0.000000e+00", "1.000000e+00" 
+     .PolarizationVector "0.000000e+00", "1.000000e+00", "0.000000e+00" 
+     .SetCoordinateSystemType "spherical" 
+     .SetAutomaticCoordinateSystem "True" 
+     .SetPolarizationType "Linear" 
+     .SlantAngle 0.000000e+00 
+     .Origin "bbox" 
+     .Userorigin "0.000000e+00", "0.000000e+00", "0.000000e+00" 
+     .SetUserDecouplingPlane "False" 
+     .UseDecouplingPlane "False" 
+     .DecouplingPlaneAxis "X" 
+     .DecouplingPlanePosition "0.000000e+00" 
+     .LossyGround "False" 
+     .GroundEpsilon "1" 
+     .GroundKappa "0" 
+     .EnablePhaseCenterCalculation "False" 
+     .SetPhaseCenterAngularLimit "3.000000e+01" 
+     .SetPhaseCenterComponent "boresight" 
+     .SetPhaseCenterPlane "both" 
+     .ShowPhaseCenter "True" 
+     .ClearCuts 
+     .AddCut "lateral", "0", "1"  
+     .AddCut "lateral", "90", "1"  
+     .AddCut "polar", "90", "1"  
+
+     .StoreSettings
+End With
+

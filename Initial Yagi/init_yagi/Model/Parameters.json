@@ -1,0 +1,81 @@
+{
+    "parameters": [
+        {
+            "descr": "2960",
+            "expr": "150",
+            "name": "L",
+            "value": "150"
+        },
+        {
+            "expr": "18",
+            "name": "d",
+            "value": "18"
+        },
+        {
+            "expr": "4",
+            "name": "S0",
+            "value": "4"
+        },
+        {
+            "expr": "0.55*lambdusia",
+            "name": "L0",
+            "value": "116.05"
+        },
+        {
+            "expr": "42.2",
+            "name": "Dipole_s",
+            "value": "42.2"
+        },
+        {
+            "expr": "0.45*lambdusia",
+            "name": "Dipole_L",
+            "value": "94.95"
+        },
+        {
+            "expr": "2.5",
+            "name": "Dipole_gap",
+            "value": "2.5"
+        },
+        {
+            "expr": "0.9*Dipole_L",
+            "name": "L_d1",
+            "value": "85.455"
+        },
+        {
+            "expr": "58.1",
+            "name": "S_d1",
+            "value": "58.1"
+        },
+        {
+            "expr": "0.9*L_d1",
+            "name": "L_d2",
+            "value": "76.9095"
+        },
+        {
+            "expr": "96.1",
+            "name": "S_d2",
+            "value": "96.1"
+        },
+        {
+            "expr": "0.9*L_d2",
+            "name": "L_d3",
+            "value": "69.21855"
+        },
+        {
+            "expr": "141",
+            "name": "S_d3",
+            "value": "141"
+        },
+        {
+            "expr": "2.5",
+            "name": "r",
+            "value": "2.5"
+        },
+        {
+            "expr": "211",
+            "name": "lambdusia",
+            "value": "211"
+        }
+    ],
+    "version": 1
+}

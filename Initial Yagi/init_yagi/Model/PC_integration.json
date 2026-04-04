@@ -1,0 +1,59 @@
+{
+   "execution": {
+      "classname": "SMAPowerByEmagHPCFrame",
+      "libname": "SMAPowerByEmagUI"
+   },
+   "inputVariables": [
+      {
+         "name": "L",
+         "type": "float",
+         "value": 150.0
+      },
+      {
+         "name": "d",
+         "type": "float",
+         "value": 18.0
+      },
+      {
+         "name": "S0",
+         "type": "float",
+         "value": 4.0
+      },
+      {
+         "name": "Dipole_s",
+         "type": "float",
+         "value": 42.2
+      },
+      {
+         "name": "Dipole_gap",
+         "type": "float",
+         "value": 2.5
+      },
+      {
+         "name": "S_d1",
+         "type": "float",
+         "value": 58.1
+      },
+      {
+         "name": "S_d2",
+         "type": "float",
+         "value": 96.1
+      },
+      {
+         "name": "S_d3",
+         "type": "float",
+         "value": 141.0
+      },
+      {
+         "name": "r",
+         "type": "float",
+         "value": 2.5
+      },
+      {
+         "name": "lambdusia",
+         "type": "float",
+         "value": 211.0
+      }
+   ],
+   "outputVariables": []
+}
